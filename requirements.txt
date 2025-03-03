@@ -4,3 +4,4 @@ gunicorn
 pydub
 numpy
 scipy
+matplotlib
