@@ -1,15 +1,14 @@
+from flask import Flask, request, jsonify
+from flask_cors import CORS
 from pydub import AudioSegment
 import numpy as np
 import matplotlib.pyplot as plt
-from flask import Flask, request, jsonify
-from flask_cors import CORS
+import io
+import base64
 import os
-import re
-
-AudioSegment.converter = r"A:\\ffmpeg\\ffm\\bin\\ffmpeg.exe"
 
 app = Flask(__name__)
-CORS(app)
+CORS(app)  # Включаем CORS
 os.makedirs("temp", exist_ok=True)
 
 def load_audio(file_path):
@@ -17,7 +16,7 @@ def load_audio(file_path):
         audio = AudioSegment.from_file(file_path)
         samples = np.array(audio.get_array_of_samples(), dtype=np.int16)
         return samples, audio.frame_rate
-    except Exception as e:
+    except Exception:
         return None, None
 
 def extract_lsb(samples, num_bits=1):
@@ -40,40 +39,43 @@ def bits_to_text(bits):
         else:
             break
     
-    text = ''.join(chars).strip()
-    return text if text else "No hidden message found"
+    return ''.join(chars).strip() or "No hidden message found"
 
-def plot_lsb(hidden_bits):
-    plt.figure(figsize=(12, 5))
-    plt.plot(hidden_bits[:500], linestyle='-', marker='o', markersize=2)
-    plt.xlabel("Семплы")
-    plt.ylabel("Младший бит")
-    plt.title("График младших битов аудиофайла")
-    plt.grid()
-    plt.show()
+def generate_waveform(samples):
+    plt.figure(figsize=(10, 4))
+    plt.plot(samples, alpha=0.7)
+    plt.title("Audio Waveform")
+    plt.xlabel("Time")
+    plt.ylabel("Amplitude")
+
+    img = io.BytesIO()
+    plt.savefig(img, format="png")
+    img.seek(0)
+
+    return base64.b64encode(img.getvalue()).decode("utf-8")
 
 @app.route("/analyze", methods=["POST"])
 def analyze_audio():
-    if 'file' not in request.files:
-        return jsonify({"error": "Файл не найден"}), 400
-    
-    file = request.files['file']
+    if "file" not in request.files:
+        return jsonify({"error": "No file uploaded"}), 400
+
+    file = request.files["file"]
     file_path = os.path.join("temp", file.filename)
     file.save(file_path)
-    
-    samples, frame_rate = load_audio(file_path)
+
+    samples, _ = load_audio(file_path)
     if samples is None:
-        return jsonify({"error": "Ошибка обработки файла"}), 500
-    
+        return jsonify({"error": "Error processing file"}), 500
+
     hidden_bits = extract_lsb(samples)
     extracted_text = bits_to_text(hidden_bits)
-    
-    return jsonify({"filename": file.filename, "message": extracted_text})
+    waveform_img = generate_waveform(samples)
 
-@app.route('/')
+    return jsonify({"message": extracted_text, "waveform": waveform_img})
+
+@app.route("/")
 def home():
     return "Backend is running!"
 
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=5000)
-
