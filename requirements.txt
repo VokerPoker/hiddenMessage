@@ -2,3 +2,5 @@ flask
 uvicorn
 gunicorn
 pydub
+numpy
+scipy
