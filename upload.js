@@ -44,10 +44,11 @@ function uploadFile(file) {
   const formData = new FormData();
   formData.append("file", file);
 
-  fetch("http://127.0.0.1:5000/analyze", {
+  fetch("https://hiddenmessage.onrender.com/analyze", {
     method: "POST",
     body: formData,
-  })
+})
+
     .then((response) => response.json())
     .then((data) => {
       alert("Hidden message: " + data.message);
