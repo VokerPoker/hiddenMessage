@@ -44,7 +44,7 @@ function uploadFile(file) {
   const formData = new FormData();
   formData.append("file", file);
 
-  fetch("http://127.0.0.1:5000/analyze", {
+  fetch("https://hiddenmessage-1.onrender.com/endpoint", {
     method: "POST",
     body: formData,
   })
