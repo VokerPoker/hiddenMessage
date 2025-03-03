@@ -1,5 +1,6 @@
 # Используем Python 3.12
 FROM python:3.12
+RUN apt-get update && apt-get install -y ffmpeg
 
 # Устанавливаем рабочую директорию
 WORKDIR /app
