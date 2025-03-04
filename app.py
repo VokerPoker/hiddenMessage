@@ -8,8 +8,6 @@ import re
 app = Flask(__name__, template_folder="templates", static_folder="static")
 CORS(app)
 
-# Указываем путь к ffmpeg, если требуется
-AudioSegment.converter = r"A:\\ffmpeg\\ffm\\bin\\ffmpeg.exe"
 
 os.makedirs("temp", exist_ok=True)
 
