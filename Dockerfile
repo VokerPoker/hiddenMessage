@@ -16,3 +16,4 @@ EXPOSE 5000
 
 # Запускаем сервер Flask
 CMD ["python", "app.py"]
+CMD ["gunicorn", "-b", "0.0.0.0:10000", "app:app"]
