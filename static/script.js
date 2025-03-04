@@ -13,7 +13,12 @@ function uploadFile() {
     method: "POST",
     body: formData,
   })
-    .then((response) => response.json())
+    .then((response) => {
+      if (!response.ok) {
+        throw new Error(`Server error: ${response.status}`);
+      }
+      return response.json();
+    })
     .then((data) => {
       document.getElementById("message").textContent =
         "Hidden message: " + data.message;
