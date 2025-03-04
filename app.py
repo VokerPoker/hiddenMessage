@@ -44,6 +44,9 @@ def bits_to_text(bits):
         return final_text if final_text else "No hidden message found"
     except:
         return "Error decoding message"
+@app.route("/healthz")
+def health_check():
+    return "OK", 200
 
 @app.route("/")
 def home():
